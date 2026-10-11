@@ -6,6 +6,7 @@ export interface RafflePrize {
   nombre: string;
   descripcion: string;
   imagen?: string;
+  imagenes?: string[];
   valorEstimado?: number;
   sorteoGanador?: {
     numero: string;

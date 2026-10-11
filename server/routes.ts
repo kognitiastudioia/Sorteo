@@ -317,11 +317,11 @@ apiRouter.post('/admin/draw-winner', (_req: Request, res: Response) => {
 
 // POST save or edit prize
 apiRouter.post('/admin/prizes', (req: Request, res: Response) => {
-  const { id, posicion, nombre, descripcion, imagen, valorEstimado } = req.body;
+  const { id, posicion, nombre, descripcion, imagen, imagenes, valorEstimado } = req.body;
   if (!nombre || !descripcion) {
     return res.status(400).json({ error: 'El nombre y descripción del premio son requeridos.' });
   }
-  const prize = db.savePrize({ id, posicion, nombre, descripcion, imagen, valorEstimado });
+  const prize = db.savePrize({ id, posicion, nombre, descripcion, imagen, imagenes, valorEstimado });
   res.json({ success: true, prize });
 });
 

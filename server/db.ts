@@ -800,6 +800,7 @@ class RaffleDatabase {
     nombre: string;
     descripcion: string;
     imagen?: string;
+    imagenes?: string[];
     valorEstimado?: number;
   }): RafflePrize {
     if (!this.state.raffle.premios) {
@@ -807,6 +808,9 @@ class RaffleDatabase {
     }
 
     let prize: RafflePrize;
+    const resolvedImagen = prizeData.imagen?.trim() || (prizeData.imagenes && prizeData.imagenes[0]) || undefined;
+    const resolvedImagenes = prizeData.imagenes || [];
+
     if (prizeData.id) {
       const idx = this.state.raffle.premios.findIndex((p) => p.id === prizeData.id);
       if (idx !== -1) {
@@ -815,7 +819,8 @@ class RaffleDatabase {
           posicion: prizeData.posicion !== undefined ? Number(prizeData.posicion) : this.state.raffle.premios[idx].posicion,
           nombre: prizeData.nombre.trim(),
           descripcion: prizeData.descripcion.trim(),
-          imagen: prizeData.imagen?.trim() || undefined,
+          imagen: resolvedImagen || this.state.raffle.premios[idx].imagen,
+          imagenes: resolvedImagenes.length > 0 ? resolvedImagenes : (this.state.raffle.premios[idx].imagenes || []),
           valorEstimado: prizeData.valorEstimado ? Number(prizeData.valorEstimado) : undefined,
         };
         this.state.raffle.premios[idx] = prize;
@@ -825,7 +830,8 @@ class RaffleDatabase {
           posicion: prizeData.posicion ? Number(prizeData.posicion) : this.state.raffle.premios.length + 1,
           nombre: prizeData.nombre.trim(),
           descripcion: prizeData.descripcion.trim(),
-          imagen: prizeData.imagen?.trim() || undefined,
+          imagen: resolvedImagen,
+          imagenes: resolvedImagenes,
           valorEstimado: prizeData.valorEstimado ? Number(prizeData.valorEstimado) : undefined,
           sorteoGanador: null,
         };
@@ -837,7 +843,8 @@ class RaffleDatabase {
         posicion: prizeData.posicion ? Number(prizeData.posicion) : this.state.raffle.premios.length + 1,
         nombre: prizeData.nombre.trim(),
         descripcion: prizeData.descripcion.trim(),
-        imagen: prizeData.imagen?.trim() || undefined,
+        imagen: resolvedImagen,
+        imagenes: resolvedImagenes,
         valorEstimado: prizeData.valorEstimado ? Number(prizeData.valorEstimado) : undefined,
         sorteoGanador: null,
       };

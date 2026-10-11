@@ -28,6 +28,7 @@ import {
   Smartphone,
   CreditCard,
   Save,
+  Upload,
 } from 'lucide-react';
 import type { RaffleStats, RaffleNumber, Buyer, Order, RaffleInfo, RafflePrize } from '../types';
 import { formatCLP, formatDate } from '../utils/format';
@@ -1016,19 +1017,112 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         </span>
                       </div>
 
-                      <div>
-                        <label className="block text-slate-300 mb-1 font-semibold">
-                          URL de imagen del premio (Opcional):
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="https://... o ruta de imagen"
-                          value={editingPrize.imagen || ''}
-                          onChange={(e) =>
-                            setEditingPrize({ ...editingPrize, imagen: e.target.value })
-                          }
-                          className="w-full rounded-xl border border-slate-800 bg-slate-900 p-2.5 text-white"
-                        />
+                      <div className="sm:col-span-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-slate-300 font-semibold">
+                            Imágenes del Premio (Máximo 3 imágenes):
+                          </label>
+                          <span className="text-[11px] text-slate-400">
+                            {((editingPrize.imagenes || []).length)} / 3 subidas
+                          </span>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-amber-500/50 bg-amber-950/20 text-xs font-bold text-amber-300 hover:bg-amber-950/40 cursor-pointer transition-colors">
+                              <Upload className="h-4 w-4" />
+                              <span>Subir imágenes (máx. 3)</span>
+                              <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const files = e.target.files;
+                                  if (!files || files.length === 0) return;
+                                  const currentImgs = editingPrize.imagenes || (editingPrize.imagen ? [editingPrize.imagen] : []);
+                                  const remaining = 3 - currentImgs.length;
+                                  if (remaining <= 0) {
+                                    alert('Ya has alcanzado el límite de 3 imágenes para este premio.');
+                                    return;
+                                  }
+                                  const selectedFiles = Array.from(files).slice(0, remaining);
+                                  let loaded = 0;
+                                  const newImgs = [...currentImgs];
+                                  selectedFiles.forEach((file) => {
+                                    const reader = new FileReader();
+                                    reader.onload = (evt) => {
+                                      const res = evt.target?.result as string;
+                                      if (res) newImgs.push(res);
+                                      loaded++;
+                                      if (loaded === selectedFiles.length) {
+                                        setEditingPrize({
+                                          ...editingPrize,
+                                          imagenes: newImgs,
+                                          imagen: newImgs[0] || editingPrize.imagen || '',
+                                        });
+                                      }
+                                    };
+                                    reader.readAsDataURL(file);
+                                  });
+                                  e.target.value = '';
+                                }}
+                              />
+                            </label>
+                            <span className="text-[11px] text-slate-500">
+                              Sube hasta 3 fotos del producto
+                            </span>
+                          </div>
+
+                          {/* Thumbnails */}
+                          {((editingPrize.imagenes && editingPrize.imagenes.length > 0) || editingPrize.imagen) && (
+                            <div className="grid grid-cols-3 gap-2 pt-1">
+                              {(editingPrize.imagenes && editingPrize.imagenes.length > 0
+                                ? editingPrize.imagenes
+                                : [editingPrize.imagen!]
+                              ).map((imgUrl, idx) => (
+                                <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-800 bg-slate-900 aspect-square">
+                                  <img
+                                    src={imgUrl}
+                                    alt={`Premio ${idx + 1}`}
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = (editingPrize.imagenes || [editingPrize.imagen!]).filter((_, i) => i !== idx);
+                                      setEditingPrize({
+                                        ...editingPrize,
+                                        imagenes: updated,
+                                        imagen: updated[0] || '',
+                                      });
+                                    }}
+                                    className="absolute top-1 right-1 rounded-full bg-rose-950/80 p-1 text-rose-300 hover:bg-rose-900 transition-colors cursor-pointer"
+                                    title="Eliminar imagen"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                  <span className="absolute bottom-1 left-1 rounded bg-slate-950/80 px-1.5 py-0.5 text-[9px] font-mono text-amber-400">
+                                    #{idx + 1}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          <div>
+                            <input
+                              type="text"
+                              placeholder="O pega URL externa de imagen..."
+                              value={editingPrize.imagen || ''}
+                              onChange={(e) =>
+                                setEditingPrize({ ...editingPrize, imagen: e.target.value })
+                              }
+                              className="w-full rounded-xl border border-slate-800 bg-slate-900 p-2 text-xs text-slate-300"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
 
