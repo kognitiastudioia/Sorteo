@@ -105,9 +105,16 @@ apiRouter.post('/checkout', async (req: Request, res: Response) => {
       const flowRes = await createFlowPayment(
         {
           commerceOrder: result.order!.id,
-          subject: `Gran Sorteo 2026 - ${numbers.length} números (${numbers.slice(0, 4).join(', ')}${numbers.length > 4 ? '...' : ''})`,
+          subject: `Gran Sorteo 2026 - ${numbers.length} números: #${numbers.join(', ')}`.slice(0, 80),
           amount: result.order!.total,
           email: buyer.email,
+          optional: {
+            numbers: numbers.join(', '),
+            ticketCount: numbers.length,
+            buyerName: buyer.nombre,
+            buyerRut: buyer.documento,
+            buyerPhone: buyer.telefono,
+          },
         },
         {
           apiKey: raffle.flowApiKey || DEFAULT_FLOW_CONFIG.apiKey,
@@ -149,10 +156,15 @@ apiRouter.post('/flow/create-payment', async (req: Request, res: Response) => {
     const flowResult = await createFlowPayment(
       {
         commerceOrder: orderId,
-        subject: `Gran Sorteo 2026 - Rifa (${numbers?.length || 1} tickets)`,
+        subject: `Gran Sorteo 2026 - ${numbers?.length || 1} tickets: #${numbers?.join(', ') || ''}`.slice(0, 80),
         amount: amount || (numbers?.length || 1) * raffle.precio_numero,
         email: buyer?.email || 'contacto@flow.cl',
         urlReturn: returnUrl,
+        optional: {
+          numbers: numbers?.join(', ') || '',
+          ticketCount: numbers?.length || 1,
+          buyerName: buyer?.nombre || '',
+        },
       },
       {
         apiKey: raffle.flowApiKey || DEFAULT_FLOW_CONFIG.apiKey,
@@ -294,7 +306,7 @@ apiRouter.post('/admin/numbers/:numero/status', (req: Request, res: Response) =>
   const { numero } = req.params;
   const { action, buyerInfo } = req.body;
 
-  if (!['liberar', 'marcar_pagado', 'cancelar_venta'].includes(action)) {
+  if (!['liberar', 'marcar_pagado', 'cancelar_venta', 'bloquear', 'desbloquear'].includes(action)) {
     return res.status(400).json({ error: 'Acción inválida' });
   }
 

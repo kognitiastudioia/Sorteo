@@ -158,7 +158,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleAction = async (numero: string, action: 'liberar' | 'marcar_pagado' | 'cancelar_venta', buyerInfo?: any) => {
+  const handleAction = async (numero: string, action: 'liberar' | 'marcar_pagado' | 'cancelar_venta' | 'bloquear' | 'desbloquear', buyerInfo?: any) => {
     try {
       setActionLoading(numero);
       const res = await fetch(`/api/admin/numbers/${numero}/status`, {
@@ -760,7 +760,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           #{item.numero}
                         </td>
 
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 flex items-center gap-1.5 flex-wrap">
                           {item.estado === 'disponible' && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-400 border border-emerald-500/20">
                               🟢 Disponible
@@ -774,6 +774,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           {item.estado === 'pagado' && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[11px] font-medium text-rose-400 border border-rose-500/20">
                               🔴 Pagado
+                            </span>
+                          )}
+                          {item.is_locked && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 border border-amber-500/30">
+                              🔒 Bloqueado (Antisobreventa)
                             </span>
                           )}
                         </td>
@@ -832,18 +837,46 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             )}
 
                             {item.estado === 'pagado' && (
-                              <button
-                                onClick={() => {
-                                  if (confirm(`¿Seguro que deseas cancelar la venta del número #${item.numero}? Volverá a estar disponible.`)) {
-                                    handleAction(item.numero, 'cancelar_venta');
-                                  }
-                                }}
-                                disabled={actionLoading === item.numero}
-                                className="flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-950/20 px-2 py-1 text-[10px] text-rose-300 hover:bg-rose-900/40 transition-colors cursor-pointer"
-                                title="Cancelar venta y liberar"
-                              >
-                                Cancelar
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => {
+                                    const buyerDoc = (item.buyer as any)?.documento || 'N/A';
+                                    const msg = `🎟️ *CONFIRMACIÓN DE PAGO - RIFA*\n\n` +
+                                      `👤 *Comprador:* ${item.buyer?.nombre || 'Comprador'}\n` +
+                                      `🆔 *RUT/DNI:* ${buyerDoc}\n` +
+                                      `📞 *Teléfono:* ${item.buyer?.telefono || 'N/A'}\n` +
+                                      `✉️ *Correo:* ${item.buyer?.email || 'N/A'}\n` +
+                                      `🔢 *Números elegidos:* #${item.numero}\n` +
+                                      `💵 *Monto pagado:* ${formatCLP(raffle?.precio_numero || 2000)}\n\n` +
+                                      `¡Pago confirmado y comprobante enviado!`;
+
+                                    navigator.clipboard.writeText(msg).then(() => {
+                                      alert('¡Datos de confirmación copiados al portapapeles! Abriendo Telegram...');
+                                      window.open('https://t.me/riffac', '_blank');
+                                    }).catch(() => {
+                                      window.open('https://t.me/riffac', '_blank');
+                                    });
+                                  }}
+                                  disabled={actionLoading === item.numero}
+                                  className="flex items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-950/40 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 hover:bg-emerald-900/60 transition-colors cursor-pointer"
+                                  title="Confirmar pago y enviar comprobante a Telegram (https://t.me/riffac)"
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                  Enviar Comprobante
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (confirm(`¿Seguro que deseas cancelar la venta del número #${item.numero}? Volverá a estar disponible.`)) {
+                                      handleAction(item.numero, 'cancelar_venta');
+                                    }
+                                  }}
+                                  disabled={actionLoading === item.numero}
+                                  className="flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-950/20 px-2 py-1 text-[10px] text-rose-300 hover:bg-rose-900/40 transition-colors cursor-pointer"
+                                  title="Cancelar venta y liberar"
+                                >
+                                  Cancelar
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>

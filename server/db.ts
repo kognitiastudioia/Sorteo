@@ -663,7 +663,7 @@ class RaffleDatabase {
     };
   }
 
-  public adminUpdateNumberStatus(numero: string, action: 'liberar' | 'marcar_pagado' | 'cancelar_venta', adminBuyerInfo?: {
+  public adminUpdateNumberStatus(numero: string, action: 'liberar' | 'marcar_pagado' | 'cancelar_venta' | 'bloquear' | 'desbloquear', adminBuyerInfo?: {
     nombre: string;
     documento: string;
     telefono: string;
@@ -676,6 +676,7 @@ class RaffleDatabase {
 
     if (action === 'liberar') {
       item.estado = 'disponible';
+      item.is_locked = false;
       item.reservation_id = null;
       item.reserved_by_session = null;
       item.reserved_at = null;
@@ -685,9 +686,26 @@ class RaffleDatabase {
       return { success: true, message: `Número ${numero} liberado a disponible.`, number: item };
     }
 
+    if (action === 'bloquear') {
+      item.is_locked = true;
+      this.saveState();
+      sseManager.broadcast('numbers:locked', { numbers: [numero] });
+      sseManager.broadcast('stats:updated', this.getStats());
+      return { success: true, message: `Número ${numero} bloqueado y protegido contra sobreventa.`, number: item };
+    }
+
+    if (action === 'desbloquear') {
+      item.is_locked = false;
+      this.saveState();
+      sseManager.broadcast('numbers:unlocked', { numbers: [numero] });
+      sseManager.broadcast('stats:updated', this.getStats());
+      return { success: true, message: `Número ${numero} desbloqueado.`, number: item };
+    }
+
     if (action === 'cancelar_venta') {
       const prevOrderId = item.order_id;
       item.estado = 'disponible';
+      item.is_locked = false;
       item.buyer_id = null;
       item.buyer_nombre = null;
       item.order_id = null;
@@ -746,6 +764,7 @@ class RaffleDatabase {
       };
 
       item.estado = 'pagado';
+      item.is_locked = true; // Auto-lock when manually confirmed paid to prevent over-selling
       item.buyer_id = buyerId;
       item.buyer_nombre = bInfo.nombre;
       item.order_id = orderId;
@@ -760,7 +779,7 @@ class RaffleDatabase {
         orderId,
       });
       sseManager.broadcast('stats:updated', this.getStats());
-      return { success: true, message: `Número ${numero} marcado como PAGADO manualmente.`, number: item };
+      return { success: true, message: `Número ${numero} marcado como PAGADO y bloqueado.`, number: item };
     }
 
     return { success: false, message: 'Acción no reconocida' };

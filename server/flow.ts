@@ -76,6 +76,10 @@ export async function createFlowPayment(
       params.paymentMethod = input.paymentMethod;
     }
 
+    if (input.optional) {
+      params.optional = JSON.stringify(input.optional);
+    }
+
     const signature = signFlowParams(params, secretKey);
     const postBody = new URLSearchParams({
       ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),

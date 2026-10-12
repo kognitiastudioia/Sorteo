@@ -79,6 +79,7 @@ export const NumbersGrid: React.FC<NumbersGridProps> = ({
           {filteredNumbers.map((item) => {
             const isSelected = selectedSet.has(item.numero);
             const isPaid = item.estado === 'pagado';
+            const isLocked = item.is_locked;
             const isReservedByOther =
               item.estado === 'reservado' && item.reserved_by_session !== sessionId;
             const isReservedByMe =
@@ -95,6 +96,12 @@ export const NumbersGrid: React.FC<NumbersGridProps> = ({
                 'bg-gradient-to-b from-amber-300 to-amber-500 text-slate-950 font-black border-2 border-amber-200 shadow-md shadow-amber-500/30 scale-105 z-10';
               label = 'Seleccionado en tu carrito';
               icon = <Check className="h-3 w-3 text-slate-950 stroke-[3]" />;
+            } else if (isLocked) {
+              // 🔒 Bloqueado (Antisobreventa)
+              containerStyle =
+                'bg-amber-950/40 border border-amber-500/60 text-amber-400 cursor-not-allowed opacity-90 shadow-sm';
+              label = 'Bloqueado y Asegurado (Antisobreventa)';
+              icon = <Lock className="h-2.5 w-2.5 text-amber-400" />;
             } else if (isPaid) {
               // 🔴 Pagado
               containerStyle =
@@ -125,7 +132,7 @@ export const NumbersGrid: React.FC<NumbersGridProps> = ({
                 key={item.id}
                 type="button"
                 onClick={() => onToggleNumber(item.numero)}
-                disabled={isPaid || isReservedByOther}
+                disabled={isPaid || isReservedByOther || isLocked}
                 title={`Número ${item.numero} · ${label}`}
                 aria-label={`Número ${item.numero}, ${label}`}
                 className={`relative flex flex-col items-center justify-center rounded-xl p-1.5 sm:p-2 min-h-[46px] sm:min-h-[50px] transition-all duration-150 select-none ${containerStyle}`}

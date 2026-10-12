@@ -58,6 +58,7 @@ export interface RaffleNumber {
   buyer_nombre?: string | null;
   buyer?: Buyer | null;
   order?: Order | null;
+  is_locked?: boolean;
 }
 
 export interface Buyer {

@@ -12,6 +12,7 @@ import {
   CreditCard,
   Copy,
   Check,
+  Ticket,
 } from 'lucide-react';
 import { formatCLP, formatRUT, formatTimeLeft } from '../utils/format';
 
@@ -314,8 +315,31 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {/* Buyer fields */}
             <div className="space-y-3.5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                1. Datos del participante
+                1. Datos del participante y números asignados
               </h3>
+
+              {/* Automatically completed chosen numbers */}
+              <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-amber-300 font-semibold flex items-center gap-1.5">
+                    <Ticket className="h-3.5 w-3.5" />
+                    Números elegidos (completados automáticamente):
+                  </span>
+                  <span className="font-mono font-bold text-amber-200">
+                    {selectedNumbers.length} {selectedNumbers.length === 1 ? 'ticket' : 'tickets'}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-0.5">
+                  {selectedNumbers.map((num) => (
+                    <span
+                      key={num}
+                      className="rounded-md bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 text-xs font-mono font-extrabold text-amber-300"
+                    >
+                      #{num}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
               <div>
                 <label className="block text-xs font-medium text-slate-300 mb-1">

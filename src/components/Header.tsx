@@ -62,9 +62,6 @@ export const Header: React.FC<HeaderProps> = ({
           <a href="#numeros" className="hover:text-amber-400 transition-colors">
             Cuadrícula de Números
           </a>
-          <a href="#premio" className="hover:text-amber-400 transition-colors">
-            Premios
-          </a>
           <button
             onClick={onOpenRules}
             className="hover:text-amber-400 transition-colors text-left cursor-pointer"

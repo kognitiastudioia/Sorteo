@@ -68,13 +68,17 @@ export const PurchaseSuccessModal: React.FC<PurchaseSuccessModalProps> = ({
 
   const handleShareWhatsApp = () => {
     const text = encodeURIComponent(
-      `🎉 ¡Ya tengo mis números para el Gran Sorteo 2026 (iPhone 16 Pro Max + AirPods Pro 2)!\n\n` +
-      `🎟️ Mis números: ${numbers.join(' - ')}\n` +
-      `👤 Participante: ${order.buyer_nombre}\n` +
-      `📜 Orden: ${order.id}\n\n` +
-      `¡Deseadme mucha suerte! 🍀`
+      `🎉 *COMPROBANTE DE COMPRA - GRAN SORTEO*\n\n` +
+      `👤 *Comprador:* ${order.buyer_nombre}\n` +
+      `🪪 *RUT / Doc:* ${order.buyer_documento}\n` +
+      `📞 *Teléfono:* ${order.buyer_telefono}\n` +
+      `✉️ *Correo:* ${order.buyer_email}\n` +
+      `🎟️ *Números comprados:* ${numbers.map((n) => `#${n}`).join(' - ')}\n` +
+      `💰 *Monto pagado:* ${formatCLP(order.total)}\n` +
+      `📜 *Orden:* ${order.id}\n` +
+      `⚡ *Método de pago:* ${order.payment_provider}\n`
     );
-    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    window.open(`https://api.whatsapp.com/send?phone=56934696074&text=${text}`, '_blank');
   };
 
   const handleDownloadReceipt = () => {
@@ -262,7 +266,7 @@ export const PurchaseSuccessModal: React.FC<PurchaseSuccessModalProps> = ({
               className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 py-3 px-4 text-xs font-bold text-white transition-colors cursor-pointer shadow-md shadow-emerald-600/20"
             >
               <Share2 className="h-4 w-4" />
-              <span>Compartir mis números</span>
+              <span>Compartir</span>
             </button>
           </div>
 

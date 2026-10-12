@@ -65,6 +65,7 @@ export interface RaffleNumber {
   reserved_by_session?: string | null;
   paid_at?: string | null;
   buyer_nombre?: string | null;
+  is_locked?: boolean;
 }
 
 export interface Reservation {
